@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Quiz</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px 40px;
+}
+.screen { display: none; width: 100%; max-width: 480px; }
+.screen.active { display: block; }
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 22px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+h1 { font-size: 1.55rem; color: #1a202c; margin-bottom: 6px; }
+.sub { color: #718096; font-size: 0.93rem; margin-bottom: 24px; line-height: 1.5; }
+input[type="text"] {
+  width: 100%; padding: 14px 16px;
+  border: 2px solid #e2e8f0; border-radius: 11px;
+  font-size: 1rem; outline: none; margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+input[type="text"]:focus { border-color: #667eea; }
+.btn-primary {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; border: none; border-radius: 11px;
+  font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-primary:active { opacity: 0.88; transform: scale(0.98); }
+.prog-wrap { background: #e2e8f0; border-radius: 99px; height: 6px; margin-bottom: 18px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg,#667eea,#764ba2); transition: width 0.3s; }
+.q-label { color: #764ba2; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.q-text { font-size: 1.08rem; font-weight: 600; color: #1a202c; margin-bottom: 20px; line-height: 1.45; }
+.options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.opt {
+  padding: 13px 16px; border: 2px solid #e2e8f0; border-radius: 11px;
+  cursor: pointer; font-size: 0.94rem; color: #2d3748;
+  transition: all 0.15s; user-select: none;
+}
+.opt:active { transform: scale(0.99); }
+.opt.selected { border-color: #667eea; background: #ebf4ff; color: #3c366b; font-weight: 500; }
+.nav { display: flex; gap: 10px; }
+.btn-back {
+  flex: 1; padding: 13px; border: 2px solid #e2e8f0; border-radius: 11px;
+  background: #fff; cursor: pointer; font-size: 0.94rem; font-weight: 500; color: #4a5568;
+}
+.btn-next {
+  flex: 2; padding: 13px; border: none; border-radius: 11px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff; font-size: 0.94rem; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.score-ring {
+  width: 118px; height: 118px; border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  margin: 0 auto 22px; color: #fff;
+}
+.score-ring .big { font-size: 2.1rem; font-weight: 700; line-height: 1; }
+.score-ring .small { font-size: 0.72rem; opacity: 0.82; margin-top: 2px; }
+.result-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 0; border-bottom: 1px solid #f0f4f8; font-size: 0.88rem;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row .lbl { color: #718096; }
+.result-row .val { color: #1a202c; font-weight: 500; text-align: right; }
+.badge {
+  margin-top: 18px; padding: 10px 14px; border-radius: 10px;
+  font-size: 0.84rem; text-align: center;
+}
+.badge.sending { background: #ebf8ff; color: #2b6cb0; }
+.badge.ok { background: #f0fff4; color: #276749; }
+.badge.err { background: #fff5f5; color: #c53030; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1 -->
+<div class="screen active" id="s1">
+  <div class="card">
+    <h1>📝 General Quiz</h1>
+    <p class="sub">10 multiple-choice questions.<br>Enter your name to begin.</p>
+    <input type="text" id="nameInput" placeholder="Your name" maxlength="60" autocomplete="off">
+    <button class="btn-primary" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+</div>
+
+<!-- SCREEN 2 -->
+<div class="screen" id="s2">
+  <div class="card">
+    <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="q-label" id="qLabel"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="qOptions"></div>
+    <div class="nav">
+      <button class="btn-back" onclick="prevQ()">← Back</button>
+      <button class="btn-next" id="nextBtn" onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3 -->
+<div class="screen" id="s3">
+  <div class="card">
+    <h1 style="text-align:center;margin-bottom:4px">Your Results</h1>
+    <p class="sub" style="text-align:center;margin-bottom:20px" id="r-name"></p>
+    <div class="score-ring">
+      <div class="big" id="r-score"></div>
+      <div class="small">out of 10</div>
+    </div>
+    <div id="r-rows"></div>
+    <div class="badge sending" id="r-badge">Submitting results…</div>
+  </div>
+</div>
+
+<script>
+// ─── REPLACE THIS WITH YOUR WORKER URL ───────────────────────────────────────
+const SUBMIT_URL = 'https://mixture36dmin.jackgerman6.workers.dev/submit';
+// ─────────────────────────────────────────────────────────────────────────────
+
+const QUESTIONS = [
+  { q: 'What is the capital of France?',
+    opts: ['Berlin','Madrid','Paris','London'], ans: 2 },
+  { q: 'How many planets are in our solar system?',
+    opts: ['7','8','9','10'], ans: 1 },
+  { q: 'Who painted the Mona Lisa?',
+    opts: ['Michelangelo','Van Gogh','Picasso','Leonardo da Vinci'], ans: 3 },
+  { q: 'What is 15 × 7?',
+    opts: ['95','100','105','110'], ans: 2 },
+  { q: "Which element has the chemical symbol 'O'?",
+    opts: ['Gold','Osmium','Oxygen','Silver'], ans: 2 },
+  { q: 'In what year did World War II end?',
+    opts: ['1943','1944','1945','1946'], ans: 2 },
+  { q: 'How many sides does a hexagon have?',
+    opts: ['5','6','7','8'], ans: 1 },
+  { q: 'What is the largest ocean on Earth?',
+    opts: ['Atlantic','Indian','Arctic','Pacific'], ans: 3 },
+  { q: "Who wrote 'Romeo and Juliet'?",
+    opts: ['Charles Dickens','William Shakespeare','Jane Austen','Mark Twain'], ans: 1 },
+  { q: 'Approximately how fast does light travel (km/s)?',
+    opts: ['100,000','200,000','300,000','400,000'], ans: 2 },
+];
+
+let userName = '', answers = new Array(10).fill(null), current = 0, startTime = null;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startQuiz() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { document.getElementById('nameInput').focus(); return; }
+  userName = name;
+  startTime = new Date();
+  answers = new Array(10).fill(null);
+  current = 0;
+  renderQ();
+  show('s2');
+}
+
+function renderQ() {
+  const q = QUESTIONS[current];
+  document.getElementById('qLabel').textContent = 'Question ' + (current + 1) + ' of ' + QUESTIONS.length;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progFill').style.width = (current / QUESTIONS.length * 100) + '%';
+  document.getElementById('nextBtn').textContent = current === QUESTIONS.length - 1 ? 'Submit ✓' : 'Next →';
+
+  const wrap = document.getElementById('qOptions');
+  wrap.innerHTML = '';
+  q.opts.forEach(function(opt, i) {
+    var div = document.createElement('div');
+    div.className = 'opt' + (answers[current] === i ? ' selected' : '');
+    div.textContent = opt;
+    div.onclick = function() { pick(i); };
+    wrap.appendChild(div);
+  });
+}
+
+function pick(i) {
+  answers[current] = i;
+  document.querySelectorAll('.opt').forEach(function(el, idx) {
+    el.classList.toggle('selected', idx === i);
+  });
+}
+
+function prevQ() { if (current > 0) { current--; renderQ(); } }
+
+function nextQ() {
+  if (current < QUESTIONS.length - 1) { current++; renderQ(); }
+  else { submitQuiz(); }
+}
+
+function fmt(d) {
+  return d.toLocaleDateString(undefined, { day:'2-digit', month:'short', year:'numeric' })
+    + ' ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+function submitQuiz() {
+  var unanswered = answers.filter(function(a) { return a === null; }).length;
+  if (unanswered > 0 && !confirm(unanswered + ' question(s) unanswered. Submit anyway?')) return;
+
+  var submitTime = new Date();
+  var score = answers.reduce(function(n, a, i) { return n + (a === QUESTIONS[i].ans ? 1 : 0); }, 0);
+  var pct = score * 10;
+  var dur = Math.round((submitTime - startTime) / 1000);
+
+  document.getElementById('r-name').textContent = 'Well done, ' + userName + '!';
+  document.getElementById('r-score').textContent = score;
+
+  var rows = [
+    ['Name', userName],
+    ['Score', score + ' / 10  (' + pct + '%)'],
+    ['Start time', fmt(startTime)],
+    ['Submit time', fmt(submitTime)],
+    ['Duration', dur + ' seconds'],
+  ];
+  document.getElementById('r-rows').innerHTML = rows.map(function(r) {
+    return '<div class="result-row"><span class="lbl">' + r[0] + '</span><span class="val">' + r[1] + '</span></div>';
+  }).join('');
+
+  show('s3');
+
+  var payload = {
+    name: userName,
+    score: score,
+    total: 10,
+    percentage: pct,
+    startTime: startTime.toISOString(),
+    submitTime: submitTime.toISOString(),
+    durationSeconds: dur,
+    answers: answers.map(function(a, i) {
+      return {
+        question: QUESTIONS[i].q,
+        selected: a !== null ? QUESTIONS[i].opts[a] : null,
+        correct: QUESTIONS[i].opts[QUESTIONS[i].ans],
+        isCorrect: a === QUESTIONS[i].ans,
+      };
+    }),
+  };
+
+  fetch(SUBMIT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  .then(function(r) {
+    var b = document.getElementById('r-badge');
+    if (r.ok) { b.className = 'badge ok'; b.textContent = '✓ Results submitted successfully'; }
+    else       { b.className = 'badge err'; b.textContent = '⚠ Server error — results not saved'; }
+  })
+  .catch(function() {
+    var b = document.getElementById('r-badge');
+    b.className = 'badge err'; b.textContent = '⚠ Could not reach server';
+  });
+}
+</script>
+</body>
+</html>
