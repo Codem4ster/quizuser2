@@ -1,538 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Mobile Quiz | Name • Quiz • Results</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      margin: 0;
-    }
-
-    .mobile-frame {
-      width: 100%;
-      max-width: 420px;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 40px;
-      padding: 20px 16px 24px;
-      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .screen {
-      display: none;
-      flex-direction: column;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 28px;
-      padding: 24px 18px;
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
-      color: #0f172a;
-      transition: all 0.2s ease;
-    }
-
-    .screen.active {
-      display: flex;
-    }
-
-    h1, h2 {
-      font-weight: 600;
-      color: #0f172a;
-      margin-bottom: 20px;
-      text-align: center;
-      letter-spacing: -0.3px;
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 12px;
-    }
-
-    h2 {
-      font-size: 1.6rem;
-      margin-bottom: 18px;
-    }
-
-    .name-label {
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: #334155;
-      font-size: 1rem;
-      text-align: left;
-      width: 100%;
-    }
-
-    input {
-      width: 100%;
-      padding: 16px 18px;
-      font-size: 1.1rem;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 20px;
-      background: #f8fafc;
-      margin-bottom: 28px;
-      outline: none;
-      transition: border 0.2s, box-shadow 0.2s;
-      color: #0f172a;
-    }
-
-    input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
-    }
-
-    .btn {
-      background: #0f172a;
-      border: none;
-      color: white;
-      font-weight: 600;
-      font-size: 1.2rem;
-      padding: 16px 24px;
-      border-radius: 30px;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.25s, transform 0.1s, box-shadow 0.2s;
-      letter-spacing: 0.3px;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.3);
-      margin-top: 8px;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-      background: #1e293b;
-    }
-
-    .btn-secondary {
-      background: white;
-      color: #0f172a;
-      border: 1.5px solid #0f172a;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-      margin-top: 12px;
-    }
-
-    .quiz-container {
-      max-height: 55vh;
-      overflow-y: auto;
-      padding-right: 4px;
-      margin-bottom: 16px;
-    }
-
-    .question-card {
-      background: #f1f5f9;
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .question-text {
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #0f172a;
-      font-size: 1rem;
-    }
-
-    .options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .option-item {
-      display: flex;
-      align-items: center;
-      background: white;
-      border-radius: 14px;
-      padding: 10px 14px;
-      border: 1px solid #cbd5e1;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-
-    .option-item.selected {
-      background: #dbeafe;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
-    }
-
-    .option-item input[type="radio"] {
-      width: 20px;
-      height: 20px;
-      margin-right: 12px;
-      accent-color: #0f172a;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
-    .option-item label {
-      font-size: 0.95rem;
-      color: #1e293b;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .submit-area {
-      margin-top: 8px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .result-box {
-      background: #f8fafc;
-      border-radius: 22px;
-      padding: 20px;
-      margin: 16px 0;
-      text-align: center;
-      border: 1px solid #e2e8f0;
-    }
-
-    .timestamp {
-      font-size: 0.9rem;
-      color: #475569;
-      margin: 8px 0;
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px dashed #cbd5e1;
-      padding-bottom: 6px;
-    }
-
-    .score {
-      font-size: 2.4rem;
-      font-weight: 700;
-      color: #0f172a;
-      margin: 10px 0;
-    }
-
-    .small-note {
-      font-size: 0.8rem;
-      color: #64748b;
-      margin-top: 12px;
-      text-align: center;
-    }
-
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    hr {
-      margin: 16px 0 8px;
-      border: 0.5px solid #e2e8f0;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .screen { display: none; width: 100%; max-width: 480px; padding: 24px 16px 40px; }
+  .screen.active { display: block; }
+  h1 { font-size: 1.6rem; font-weight: 700; color: #1a202c; margin-bottom: 8px; }
+  p.sub { color: #718096; font-size: 0.95rem; margin-bottom: 28px; }
+  input[type="text"] {
+    width: 100%; padding: 14px; font-size: 1rem;
+    border: 2px solid #cbd5e0; border-radius: 10px;
+    outline: none; transition: border 0.2s;
+    background: #fff;
+  }
+  input[type="text"]:focus { border-color: #4f46e5; }
+  .btn {
+    display: block; width: 100%; padding: 15px;
+    background: #4f46e5; color: #fff; font-size: 1rem; font-weight: 600;
+    border: none; border-radius: 10px; cursor: pointer;
+    margin-top: 20px; transition: background 0.2s;
+  }
+  .btn:hover { background: #4338ca; }
+  .btn:disabled { background: #a5b4fc; cursor: not-allowed; }
+  .progress {
+    font-size: 0.82rem; color: #718096; margin-bottom: 4px;
+  }
+  .progress-bar {
+    height: 6px; background: #e2e8f0; border-radius: 99px; margin-bottom: 22px;
+  }
+  .progress-fill {
+    height: 100%; background: #4f46e5; border-radius: 99px;
+    transition: width 0.3s;
+  }
+  .question-card {
+    background: #fff; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 14px;
+  }
+  .question-card h2 {
+    font-size: 1rem; font-weight: 600; color: #2d3748; margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .option label {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 8px; cursor: pointer;
+    border: 2px solid #e2e8f0; margin-bottom: 8px; background: #f7fafc;
+    font-size: 0.95rem; color: #2d3748; transition: border 0.15s, background 0.15s;
+  }
+  .option input[type="radio"] { accent-color: #4f46e5; width: 18px; height: 18px; flex-shrink: 0; }
+  .option input[type="radio"]:checked + span { font-weight: 600; color: #4f46e5; }
+  .option label:has(input:checked) { border-color: #4f46e5; background: #eef2ff; }
+  .result-card {
+    background: #fff; border-radius: 14px; padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 16px;
+  }
+  .score-big {
+    font-size: 3.5rem; font-weight: 800; color: #4f46e5; text-align: center;
+    margin: 10px 0 4px;
+  }
+  .score-label { text-align: center; color: #718096; font-size: 0.9rem; margin-bottom: 18px; }
+  .meta-row { display: flex; justify-content: space-between; padding: 10px 0;
+    border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+  .meta-row:last-child { border-bottom: none; }
+  .meta-row span:first-child { color: #718096; }
+  .meta-row span:last-child { font-weight: 600; color: #2d3748; }
+  .answer-review { margin-top: 16px; }
+  .answer-item {
+    background: #fff; border-radius: 10px; padding: 14px 16px;
+    margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid transparent;
+  }
+  .answer-item.correct { border-left-color: #38a169; }
+  .answer-item.wrong { border-left-color: #e53e3e; }
+  .answer-item .q-text { font-size: 0.88rem; color: #4a5568; margin-bottom: 6px; font-weight: 600; }
+  .answer-item .a-text { font-size: 0.85rem; color: #2d3748; }
+  .answer-item .a-text .correct-ans { color: #38a169; font-weight: 600; }
+  .answer-item .a-text .wrong-ans { color: #e53e3e; text-decoration: line-through; }
+  .status-icon { float: right; font-size: 1.1rem; }
+  .sending { text-align: center; color: #718096; font-size: 0.88rem; margin-top: 10px; }
+</style>
 </head>
 <body>
-<div class="mobile-frame">
-  <!-- Screen 1: Name Input -->
-  <div id="screenName" class="screen active">
-    <h1>📋 Quiz Time</h1>
-    <label class="name-label" for="userName">Your name</label>
-    <input type="text" id="userName" placeholder="e.g. Alex Johnson" autocomplete="off" autofocus>
-    <button class="btn" id="startQuizBtn">Start Quiz</button>
-    <p class="small-note">10 questions • instant results</p>
-  </div>
 
-  <!-- Screen 2: Quiz -->
-  <div id="screenQuiz" class="screen">
-    <h2>📝 Question <span id="currentQDisplay">1</span>/10</h2>
-    <div id="quizContainer" class="quiz-container">
-      <!-- Questions injected dynamically -->
-    </div>
-    <div class="submit-area">
-      <button class="btn" id="submitQuizBtn">✓ Submit Answers</button>
-    </div>
-  </div>
+<!-- ───── SCREEN 1: Name ───── -->
+<div class="screen active" id="screen1">
+  <h1>📝 Quiz Time</h1>
+  <p class="sub">Enter your name to begin the 10-question quiz.</p>
+  <input type="text" id="nameInput" placeholder="Your full name" maxlength="60" autocomplete="name">
+  <button class="btn" id="startBtn" onclick="startQuiz()">Start Quiz →</button>
+</div>
 
-  <!-- Screen 3: Results -->
-  <div id="screenResults" class="screen">
-    <h2>🏆 Your Results</h2>
-    <div id="resultName" style="font-weight: 600; font-size: 1.2rem; text-align: center; margin-bottom: 6px;"></div>
-    <div class="result-box">
-      <div class="score" id="scoreDisplay">0/10</div>
-      <div class="timestamp"><span>🕒 Start:</span> <span id="startTimeDisplay">--</span></div>
-      <div class="timestamp"><span>✅ Submit:</span> <span id="submitTimeDisplay">--</span></div>
-    </div>
-    <div id="sendStatus" class="small-note" style="margin-bottom: 12px; color: #2563eb;"></div>
-    <div class="button-group">
-      <button class="btn" id="retakeBtn">↺ Retake Quiz</button>
-      <button class="btn btn-secondary" id="newUserBtn">👤 New User</button>
-    </div>
-    <p class="small-note">Data sent automatically</p>
+<!-- ───── SCREEN 2: Quiz ───── -->
+<div class="screen" id="screen2">
+  <div class="progress" id="progressText">Question 0 of 10</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div id="questionsContainer"></div>
+  <button class="btn" id="submitBtn" onclick="submitQuiz()">Submit Answers</button>
+</div>
+
+<!-- ───── SCREEN 3: Results ───── -->
+<div class="screen" id="screen3">
+  <h1>Results</h1>
+  <p class="sub">Here's how you did.</p>
+  <div class="result-card">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-label" id="scoreLabel"></div>
+    <div class="meta-row"><span>Name</span><span id="resName"></span></div>
+    <div class="meta-row"><span>Start Time</span><span id="resStart"></span></div>
+    <div class="meta-row"><span>Submit Time</span><span id="resEnd"></span></div>
+    <div class="meta-row"><span>Time Taken</span><span id="resDuration"></span></div>
   </div>
+  <div class="answer-review" id="answerReview"></div>
+  <div class="sending" id="sendingStatus"></div>
 </div>
 
 <script>
-  (function() {
-    // --- PLACEHOLDER URL: easy to replace with your endpoint ---
-    const SUBMISSION_URL = "https://mixture36dmin.jackgerman6.workers.dev"; // <-- REPLACE THIS
+// ── CONFIG ──────────────────────────────────────────────
+const WORKER_URL = "https://mixture36dmin.jackgerman6.workers.dev/"; // 👈 replace this
 
-    // --- Quiz questions data ---
-    const questions = [
-      { question: "What is the capital of France?", options: ["Berlin", "Madrid", "Paris", "Rome"], correct: 2 },
-      { question: "Which planet is known as the Red Planet?", options: ["Earth", "Mars", "Jupiter", "Venus"], correct: 1 },
-      { question: "How many continents are there on Earth?", options: ["5", "6", "7", "8"], correct: 2 },
-      { question: "What is 12 + 7?", options: ["17", "19", "21", "18"], correct: 1 },
-      { question: "Which language is used for web styling?", options: ["HTML", "Python", "CSS", "Java"], correct: 2 },
-      { question: "What is the largest ocean?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct: 3 },
-      { question: "Who wrote 'Romeo and Juliet'?", options: ["Dickens", "Shakespeare", "Hemingway", "Tolkien"], correct: 1 },
-      { question: "What is the square root of 64?", options: ["6", "7", "8", "9"], correct: 2 },
-      { question: "Which gas do plants absorb?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correct: 2 },
-      { question: "How many days in a leap year?", options: ["364", "365", "366", "367"], correct: 2 }
-    ];
+// ── QUESTIONS ───────────────────────────────────────────
+const questions = [
+  {
+    q: "What is the powerhouse of the cell?",
+    options: ["Nucleus", "Mitochondria", "Ribosome", "Golgi apparatus"],
+    answer: 1
+  },
+  {
+    q: "How many planets are in our solar system?",
+    options: ["7", "8", "9", "10"],
+    answer: 1
+  },
+  {
+    q: "What is the chemical symbol for gold?",
+    options: ["Gd", "Go", "Au", "Ag"],
+    answer: 2
+  },
+  {
+    q: "Which country has the largest land area?",
+    options: ["China", "USA", "Canada", "Russia"],
+    answer: 3
+  },
+  {
+    q: "What is 12 × 12?",
+    options: ["132", "144", "124", "148"],
+    answer: 1
+  },
+  {
+    q: "Which language is primarily used to style web pages?",
+    options: ["HTML", "Python", "CSS", "Java"],
+    answer: 2
+  },
+  {
+    q: "Who wrote 'Romeo and Juliet'?",
+    options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Homer"],
+    answer: 1
+  },
+  {
+    q: "What is the speed of light (approx.) in km/s?",
+    options: ["150,000", "300,000", "500,000", "1,000,000"],
+    answer: 1
+  },
+  {
+    q: "What gas do plants absorb from the atmosphere?",
+    options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"],
+    answer: 2
+  },
+  {
+    q: "Which ocean is the largest?",
+    options: ["Atlantic", "Indian", "Arctic", "Pacific"],
+    answer: 3
+  }
+];
 
-    // --- State ---
-    let userName = "";
-    let startTime = null;      // Date object
-    let submitTime = null;
-    let userAnswers = new Array(questions.length).fill(null); // store selected option index
+// ── STATE ───────────────────────────────────────────────
+let userName = "";
+let startTime = null;
 
-    // DOM elements
-    const screenName = document.getElementById('screenName');
-    const screenQuiz = document.getElementById('screenQuiz');
-    const screenResults = document.getElementById('screenResults');
-    const userNameInput = document.getElementById('userName');
-    const startQuizBtn = document.getElementById('startQuizBtn');
-    const quizContainer = document.getElementById('quizContainer');
-    const submitQuizBtn = document.getElementById('submitQuizBtn');
-    const currentQDisplay = document.getElementById('currentQDisplay');
-    const resultName = document.getElementById('resultName');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const startTimeDisplay = document.getElementById('startTimeDisplay');
-    const submitTimeDisplay = document.getElementById('submitTimeDisplay');
-    const sendStatus = document.getElementById('sendStatus');
-    const retakeBtn = document.getElementById('retakeBtn');
-    const newUserBtn = document.getElementById('newUserBtn');
+// ── HELPERS ─────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
 
-    // Helper: switch screens
-    function showScreen(screen) {
-      screenName.classList.remove('active');
-      screenQuiz.classList.remove('active');
-      screenResults.classList.remove('active');
-      screen.classList.add('active');
-    }
+function formatDate(d) {
+  return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" })
+    + " " + d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+}
 
-    // Format date/time nicely
-    function formatDateTime(date) {
-      if (!date) return '--';
-      return date.toLocaleString('en-US', { 
-        year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      });
-    }
+function secondsToHMS(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
 
-    // Render quiz questions dynamically
-    function renderQuiz() {
-      if (!quizContainer) return;
-      quizContainer.innerHTML = '';
-      questions.forEach((q, index) => {
-        const card = document.createElement('div');
-        card.className = 'question-card';
-        card.innerHTML = `
-          <div class="question-text">${index+1}. ${q.question}</div>
-          <div class="options" data-question-index="${index}">
-            ${q.options.map((opt, optIndex) => {
-              const checkedAttr = (userAnswers[index] === optIndex) ? 'checked' : '';
-              return `
-                <div class="option-item ${userAnswers[index] === optIndex ? 'selected' : ''}" data-option-index="${optIndex}">
-                  <input type="radio" name="q${index}" value="${optIndex}" id="q${index}_opt${optIndex}" ${checkedAttr}>
-                  <label for="q${index}_opt${optIndex}">${opt}</label>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `;
-        quizContainer.appendChild(card);
-      });
+// ── SCREEN 1 → 2 ────────────────────────────────────────
+function startQuiz() {
+  const val = document.getElementById("nameInput").value.trim();
+  if (!val) { alert("Please enter your name."); return; }
+  userName = val;
+  startTime = new Date();
+  buildQuiz();
+  show("screen2");
+}
 
-      // Attach event listeners for option selection
-      document.querySelectorAll('.options').forEach(optGroup => {
-        const qIndex = parseInt(optGroup.dataset.questionIndex, 10);
-        optGroup.addEventListener('click', (e) => {
-          const optionItem = e.target.closest('.option-item');
-          if (!optionItem) return;
-          const radio = optionItem.querySelector('input[type="radio"]');
-          if (radio) {
-            radio.checked = true;
-            const optIndex = parseInt(optionItem.dataset.optionIndex, 10);
-            // Update userAnswers
-            userAnswers[qIndex] = optIndex;
-            // Update visual selected class within this group
-            const allOptions = optGroup.querySelectorAll('.option-item');
-            allOptions.forEach(item => item.classList.remove('selected'));
-            optionItem.classList.add('selected');
-          }
-        });
-      });
+document.getElementById("nameInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") startQuiz();
+});
 
-      // Update question progress indicator (simple)
-      if (currentQDisplay) {
-        const answered = userAnswers.filter(ans => ans !== null).length;
-        currentQDisplay.textContent = `${answered}/${questions.length}`;
-      }
-    }
+// ── BUILD QUIZ ───────────────────────────────────────────
+function buildQuiz() {
+  const container = document.getElementById("questionsContainer");
+  container.innerHTML = "";
 
-    // Calculate score
-    function calculateScore() {
-      let correctCount = 0;
-      userAnswers.forEach((ans, idx) => {
-        if (ans === questions[idx].correct) correctCount++;
-      });
-      return correctCount;
-    }
+  questions.forEach((q, qi) => {
+    const card = document.createElement("div");
+    card.className = "question-card";
+    card.innerHTML = `<h2>${qi + 1}. ${q.q}</h2>` +
+      q.options.map((opt, oi) =>
+        `<div class="option">
+          <label>
+            <input type="radio" name="q${qi}" value="${oi}">
+            <span>${opt}</span>
+          </label>
+        </div>`
+      ).join("");
+    container.appendChild(card);
+  });
 
-    // Send data to placeholder URL
-    async function sendDataToServer(payload) {
-      try {
-        const response = await fetch(SUBMISSION_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-        if (response.ok) {
-          return { success: true, message: 'Data sent successfully.' };
-        } else {
-          return { success: false, message: `Server responded with ${response.status}` };
+  // Live progress update
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener("change", updateProgress);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  let answered = 0;
+  questions.forEach((_, qi) => {
+    if (document.querySelector(`input[name="q${qi}"]:checked`)) answered++;
+  });
+  document.getElementById("progressText").textContent = `${answered} of 10 answered`;
+  document.getElementById("progressFill").style.width = `${(answered / 10) * 100}%`;
+  document.getElementById("submitBtn").disabled = answered < 10;
+}
+
+// ── SCREEN 2 → 3 ────────────────────────────────────────
+function submitQuiz() {
+  const submitTime = new Date();
+
+  let score = 0;
+  const answers = questions.map((q, qi) => {
+    const sel = document.querySelector(`input[name="q${qi}"]:checked`);
+    const chosen = sel ? parseInt(sel.value) : -1;
+    const correct = chosen === q.answer;
+    if (correct) score++;
+    return { question: q.q, chosen, correct, correctAnswer: q.answer, options: q.options };
+  });
+
+  const diffSec = Math.round((submitTime - startTime) / 1000);
+
+  // ── Populate results ──
+  document.getElementById("scoreBig").textContent = `${score}/10`;
+  document.getElementById("scoreLabel").textContent =
+    score === 10 ? "Perfect score! 🎉" :
+    score >= 7  ? "Great job! 👏" :
+    score >= 5  ? "Not bad! Keep practising." : "Better luck next time.";
+  document.getElementById("resName").textContent = userName;
+  document.getElementById("resStart").textContent = formatDate(startTime);
+  document.getElementById("resEnd").textContent = formatDate(submitTime);
+  document.getElementById("resDuration").textContent = secondsToHMS(diffSec);
+
+  // ── Answer review ──
+  const review = document.getElementById("answerReview");
+  review.innerHTML = "<h2 style='margin-bottom:12px;font-size:1rem;color:#2d3748'>Answer Breakdown</h2>";
+  answers.forEach((a, i) => {
+    const div = document.createElement("div");
+    div.className = "answer-item " + (a.correct ? "correct" : "wrong");
+    div.innerHTML = `
+      <span class="status-icon">${a.correct ? "✅" : "❌"}</span>
+      <div class="q-text">Q${i+1}. ${a.question}</div>
+      <div class="a-text">
+        ${a.correct
+          ? `<span class="correct-ans">✓ ${a.options[a.correctAnswer]}</span>`
+          : `<span class="wrong-ans">${a.chosen >= 0 ? a.options[a.chosen] : "No answer"}</span>
+             → <span class="correct-ans">${a.options[a.correctAnswer]}</span>`
         }
-      } catch (error) {
-        return { success: false, message: 'Network error: could not reach server.' };
-      }
-    }
+      </div>`;
+    review.appendChild(div);
+  });
 
-    // Prepare results and show screen 3
-    async function showResults() {
-      submitTime = new Date();
-      const score = calculateScore();
-      const total = questions.length;
+  show("screen3");
 
-      // Update UI
-      resultName.textContent = `👤 ${userName || 'Anonymous'}`;
-      scoreDisplay.textContent = `${score} / ${total}`;
-      startTimeDisplay.textContent = formatDateTime(startTime);
-      submitTimeDisplay.textContent = formatDateTime(submitTime);
+  // ── Send to Worker ──
+  const payload = {
+    name: userName,
+    score,
+    total: 10,
+    startTime: startTime.toISOString(),
+    submitTime: submitTime.toISOString(),
+    durationSeconds: diffSec,
+    answers: answers.map(a => ({
+      question: a.question,
+      chosen: a.chosen >= 0 ? a.options[a.chosen] : "No answer",
+      correct: a.correct,
+      correctAnswer: a.options[a.correctAnswer]
+    }))
+  };
 
-      // Build payload
-      const payload = {
-        userName: userName || 'Anonymous',
-        score: score,
-        totalQuestions: total,
-        startTime: startTime ? startTime.toISOString() : null,
-        submitTime: submitTime.toISOString(),
-        answers: userAnswers.map((ans, idx) => ({
-          question: questions[idx].question,
-          selected: ans !== null ? questions[idx].options[ans] : null,
-          correct: questions[idx].options[questions[idx].correct]
-        }))
-      };
+  const statusEl = document.getElementById("sendingStatus");
+  statusEl.textContent = "Sending results…";
 
-      // Show sending status
-      sendStatus.textContent = '⏳ Sending data...';
-      sendStatus.style.color = '#2563eb';
-
-      const sendResult = await sendDataToServer(payload);
-      
-      if (sendResult.success) {
-        sendStatus.textContent = '✅ ' + sendResult.message;
-        sendStatus.style.color = '#16a34a';
-      } else {
-        sendStatus.textContent = '⚠️ ' + sendResult.message + ' (Data shown locally)';
-        sendStatus.style.color = '#b91c1c';
-      }
-
-      showScreen(screenResults);
-    }
-
-    // Reset quiz state (keep name or clear based on context)
-    function resetQuizState(clearName = false) {
-      userAnswers = new Array(questions.length).fill(null);
-      startTime = null;
-      submitTime = null;
-      if (clearName) {
-        userName = "";
-        if (userNameInput) userNameInput.value = "";
-      }
-      // Re-render if quiz visible, but we usually switch screens
-    }
-
-    // Event: Start Quiz from name screen
-    startQuizBtn.addEventListener('click', () => {
-      const name = userNameInput.value.trim();
-      if (!name) {
-        alert('Please enter your name to start the quiz.');
-        userNameInput.focus();
-        return;
-      }
-      userName = name;
-      resetQuizState(false); // keep name, clear answers/times
-      startTime = new Date();
-      renderQuiz();
-      showScreen(screenQuiz);
-    });
-
-    // Allow Enter key on name input
-    userNameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        startQuizBtn.click();
-      }
-    });
-
-    // Submit Quiz button
-    submitQuizBtn.addEventListener('click', () => {
-      // Check if all questions answered
-      const unanswered = userAnswers.findIndex(ans => ans === null);
-      if (unanswered !== -1) {
-        alert(`Please answer question ${unanswered+1} before submitting.`);
-        // Optional: scroll to that question
-        const cards = document.querySelectorAll('.question-card');
-        if (cards[unanswered]) {
-          cards[unanswered].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
-      }
-      // Proceed to results
-      showResults();
-    });
-
-    // Retake Quiz (same user, restart quiz)
-    retakeBtn.addEventListener('click', () => {
-      resetQuizState(false); // keep userName
-      startTime = new Date();
-      renderQuiz();
-      showScreen(screenQuiz);
-    });
-
-    // New User button: go back to name screen, clear name
-    newUserBtn.addEventListener('click', () => {
-      resetQuizState(true);
-      showScreen(screenName);
-      userNameInput.focus();
-    });
-
-    // Initial safety: if someone tries to go to quiz without name (shouldn't happen via UI)
-    // Also handle visibility
-    window.addEventListener('load', () => {
-      // ensure first screen active
-      showScreen(screenName);
-      userNameInput.focus();
-    });
-
-  })();
+  fetch(WORKER_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(r => {
+    if (!r.ok) throw new Error("Non-OK response");
+    statusEl.textContent = "✓ Results submitted successfully.";
+  })
+  .catch(() => {
+    statusEl.textContent = "⚠️ Could not send results to server.";
+  });
+}
 </script>
 </body>
 </html>
